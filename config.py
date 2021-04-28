@@ -1,8 +1,8 @@
 TRAIN_DIR = "/home/ubuntu/data/consulting/data/train_data_consulting.csv"
 TEST_DIR = '/home/ubuntu/data/consulting/data/test_data_consulting.csv'
 BATCH_SIZE = 2048
-TEST_BATCH_SIZE = 100000
-CHCK_PATH = "/home/ubuntu/storage1/leeloo/checkpoint/checkmate.ckpt"
+TEST_BATCH_SIZE = 10000 #ㅠㅠ
+CHCK_PATH = "/home/ubuntu/storage1/leeloo/checkpoint/checkpoint-epoch-0004.ckpt"
 EPOCHS = 10
 COLUMNS = {
     'FEATURES': ['order_id', 'product_id', 'aisle_id', 'department_id', 'orders', 'orders_people', 'orders_people_rt',

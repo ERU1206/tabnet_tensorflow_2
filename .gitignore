@@ -8,3 +8,11 @@
 /checkpoint
 .idea/.name
 .idea/tabnet-tensorflow-2.iml
+TODO정리.py
+train_imsi.py
+logs/
+mymodel_1.ckpt.data-00000-of-00001
+mymodel_1.ckpt.index
+mymodel_1.data-00000-of-00001
+mymodel_1.index
+train2.py

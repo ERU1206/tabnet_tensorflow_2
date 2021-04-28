@@ -9,7 +9,7 @@ import models
 import dataset
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 
@@ -25,7 +25,9 @@ def calculate_probability(config):
     model = models.tabnet_model()
     model.load_weights(config.CHCK_PATH)
 
-    test_dataset = dataset.make_dataset(config.TEST_DIR, config.COLUMNS, config.TEST_BATCH_SIZE, train=False)
+    test_dataset = dataset.make_dataset(config.TEST_DIR, config.COLUMNS, config.TEST_BATCH_SIZE,
+                                        onehot=True, train=False)
+    # test_dataset = dataset.make_dataset(config.TEST_DIR, config.COLUMNS, config.TEST_BATCH_SIZE, onehot=False, train=False)
     probs = np.empty((1, 1))
     for num, chunk in enumerate(test_dataset):
         print(f"Process batch: {num + 1}")  # to 48
@@ -67,4 +69,4 @@ def summit_form(prob, test_data):
 
 if __name__ == '__main__':
     # test_dataset = dataset.make_dataset(config.TEST_DIR, config.COLUMNS, config.TEST_BATCH_SIZE, train=False)
-    test(config).to_csv('./submit.csv', index=False)
+    test(config).to_csv('./submit2.csv', index=False)

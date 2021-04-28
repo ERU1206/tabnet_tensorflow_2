@@ -71,7 +71,7 @@ class TestPackCategoryFeatures(PackCategoryFeatures):
         return features
 
 
-def make_dataset(directory, columns, make_batch_size, shuffle=True, train=True):
+def make_dataset(directory, columns, make_batch_size, onehot = False, shuffle=True, train=True):
     if train:
         dataset = from_csv_dataset(directory, columns["LABEL"], make_batch_size, train=True)
         packed_train_data = dataset.map(
@@ -81,8 +81,9 @@ def make_dataset(directory, columns, make_batch_size, shuffle=True, train=True):
             PackCategoryFeatures(columns['CATEGORY_FEATURES']))
 
         processing_layer = preprocess_layer(columns)
-        packed_train_data = packed_train_data.map(
-            lambda x, y: (processing_layer(x), y))
+        if onehot:
+            packed_train_data = packed_train_data.map(
+                lambda x, y: (processing_layer(x), y))
         if shuffle:
             packed_train_data.shuffle(10000, reshuffle_each_iteration=True)
         return packed_train_data
@@ -93,10 +94,10 @@ def make_dataset(directory, columns, make_batch_size, shuffle=True, train=True):
 
         packed_test_data = packed_test_data.map(
             TestPackCategoryFeatures(columns['CATEGORY_FEATURES']))
-
-        processing_layer = preprocess_layer(columns)
-        packed_test_data = packed_test_data.map(
-            lambda x: processing_layer(x))
+        if onehot:
+            processing_layer = preprocess_layer(columns)
+            packed_test_data = packed_test_data.map(
+                lambda x: processing_layer(x))
         if shuffle:
             packed_test_data.shuffle(10000, reshuffle_each_iteration=True)
         return packed_test_data
@@ -120,6 +121,23 @@ def preprocess_layer(columns):
 
     processing_layer = tf.keras.layers.DenseFeatures(categorical_columns + numeric_columns)
     return processing_layer
+
+def feature_columns(columns):
+    numeric_columns = [
+        tf.feature_column.numeric_column(
+            'numeric',
+            shape=[len(columns["NUMERIC_FEATURES"])]
+        )]
+
+    categorical_columns = [
+        tf.feature_column.indicator_column(
+            tf.feature_column.categorical_column_with_identity(
+                key=key,
+                num_buckets=50, default_value=0))
+        for key in columns['CATEGORY_FEATURES']]
+
+    return categorical_columns + numeric_columns
+
 
 
 if __name__ == '__main__':
