@@ -14,7 +14,7 @@ def split(dir):
         train = data.iloc[t]
         train.to_csv(f'./train_{i}.csv')
         validation = data.iloc[v]
-        validation.to_csv(f'./train_{i}.csv')
+        validation.to_csv(f'./validation_{i}.csv')
         i += 1
 
 

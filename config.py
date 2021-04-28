@@ -1,8 +1,9 @@
 TRAIN_DIR = "/home/ubuntu/data/consulting/data/train_data_consulting.csv"
 TEST_DIR = '/home/ubuntu/data/consulting/data/test_data_consulting.csv'
-BATCH_SIZE = 512
+BATCH_SIZE = 2048
 TEST_BATCH_SIZE = 100000
 CHCK_PATH = "/home/ubuntu/storage1/leeloo/checkpoint/checkmate.ckpt"
+EPOCHS = 10
 COLUMNS = {
     'FEATURES': ['order_id', 'product_id', 'aisle_id', 'department_id', 'orders', 'orders_people', 'orders_people_rt',
                  'reorders', 'reorder_rate', 'add_to_cart_order_product_mean', 'product_only_one_count',
