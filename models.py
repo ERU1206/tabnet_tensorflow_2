@@ -30,6 +30,7 @@ def tabnet_model():
     return models
 
 if __name__ == '__main__':
+    # TODO graph 확인하기
     models = tabnet_model()
     tensor = tf.random.normal([1,676])
     print(model(tensor))

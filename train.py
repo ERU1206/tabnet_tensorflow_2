@@ -6,7 +6,7 @@ import tensorflow as tf
 import os
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
-def train():
+def train(): # TODO custom loop...
     tabnet_add_dense = models.tabnet_model()
     train_dataset = dataset.make_dataset(config.TRAIN_DIR, config.COLUMNS, config.BATCH_SIZE, shuffle = True)  # MapDataset (512, 676)
     tabnet_add_dense.compile(
