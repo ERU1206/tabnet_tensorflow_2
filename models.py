@@ -1,6 +1,5 @@
 import tabnet
 import tensorflow as tf
-import doctest
 
 """
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   

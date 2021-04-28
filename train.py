@@ -1,10 +1,17 @@
-import models
-import dataset
-import config
+import os
+
 import tensorflow as tf
 
-import os
+import config
+import dataset
+import models
+
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
+# cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+#                                                  save_weights_only=True,
+#                                                  verbose=1)
+
 
 def train(): # TODO custom loop...
     tabnet_add_dense = models.tabnet_model()
