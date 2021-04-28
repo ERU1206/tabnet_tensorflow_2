@@ -7,13 +7,18 @@ import config
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
-def from_csv_dataset(data_dir, label_name, batch_size):
-    dataset = tf.data.experimental.make_csv_dataset(data_dir,
-                                                    label_name=label_name,
-                                                    na_value='nan',
-                                                    batch_size=batch_size)
-    return dataset
-
+def from_csv_dataset(data_dir, label_name, batch_size, train = True):
+    if train:
+        dataset = tf.data.experimental.make_csv_dataset(data_dir,
+                                                        label_name=label_name,
+                                                        na_value='nan',
+                                                        batch_size=batch_size)
+        return dataset
+    else:
+        dataset = tf.data.experimental.make_csv_dataset(data_dir,
+                                                        na_value='nan',
+                                                        batch_size=batch_size)
+        return dataset
 
 class PackNumericFeatures(object):
     def __init__(self, names):
@@ -41,7 +46,7 @@ class PackCategoryFeatures(object):
 
 class TestPackNumericFeatures(PackNumericFeatures):
     def __init__(self, names):
-        self.super(TestPackNumericFeatures).__init__(names)
+        super(TestPackNumericFeatures, self).__init__(names)
 
     def __call__(self, features):
         numeric_features = [features.pop(name) for name in self.names]
@@ -54,8 +59,7 @@ class TestPackNumericFeatures(PackNumericFeatures):
 
 class TestPackCategoryFeatures(PackCategoryFeatures):
     def __init__(self, names):
-        def __init__(self, names):
-            self.super(TestPackNumericFeatures).__init__(names)
+        super(TestPackCategoryFeatures, self).__init__(names)
 
     def __call__(self, features):
         for i in self.names:
@@ -64,34 +68,39 @@ class TestPackCategoryFeatures(PackCategoryFeatures):
         return features
 
 
-def make_dataset(directory, columns, make_batch_size, shuffle=True):
-    dataset = from_csv_dataset(directory, columns["LABEL"], make_batch_size)
+def make_dataset(directory, columns, make_batch_size, shuffle=True, train=True):
 
-    packed_train_data = dataset.map(
-        PackNumericFeatures(columns["NUMERIC_FEATURES"]))
+    if train:
+        dataset = from_csv_dataset(directory, columns["LABEL"], make_batch_size, train = False)
+        packed_train_data = dataset.map(
+            PackNumericFeatures(columns["NUMERIC_FEATURES"]))
 
-    packed_train_data = packed_train_data.map(
-        PackCategoryFeatures(columns['CATEGORY_FEATURES']))
+        packed_train_data = packed_train_data.map(
+            PackCategoryFeatures(columns['CATEGORY_FEATURES']))
 
-    numeric_columns = [
-        tf.feature_column.numeric_column(
-            'numeric',
-            shape=[len(columns["NUMERIC_FEATURES"])]
-        )]
+        processing_layer = preprocess_layer(columns)
+        packed_train_data = packed_train_data.map(
+            lambda x, y: (processing_layer(x), y))
+        if shuffle:
+            packed_train_data.shuffle(10000, reshuffle_each_iteration=True)
+        return packed_train_data
+    elif not train:
+        dataset = from_csv_dataset(directory, None, make_batch_size)
+        packed_test_data = dataset.map(
+            TestPackNumericFeatures(columns["NUMERIC_FEATURES"]))
 
-    categorical_columns = [
-        tf.feature_column.indicator_column(
-            tf.feature_column.categorical_column_with_identity(
-                key=key,
-                num_buckets=50, default_value=0))
-        for key in columns['CATEGORY_FEATURES']]
+        packed_test_data = packed_test_data.map(
+            TestPackCategoryFeatures(columns['CATEGORY_FEATURES']))
 
-    processing_layer = tf.keras.layers.DenseFeatures(categorical_columns + numeric_columns)
-    packed_train_data = packed_train_data.map(
-        lambda x, y: (processing_layer(x), y))
-    if shuffle:
-        packed_train_data.shuffle(10000, reshuffle_each_iteration=True)
-    return packed_train_data
+        processing_layer = preprocess_layer(columns)
+        packed_test_data = packed_test_data.map(
+            lambda x: processing_layer(x))
+        if shuffle:
+            packed_test_data.shuffle(10000, reshuffle_each_iteration=True)
+        return packed_test_data
+    else:
+        raise ValueError('train or test')
+
 
 def preprocess_layer(columns):
     numeric_columns = [
@@ -112,4 +121,4 @@ def preprocess_layer(columns):
 
 
 if __name__ == '__main__':
-    dataset = make_dataset(config.TRAIN_DIR, config.COLUMNS, config.BATCH_SIZE)  # MapDataset (512, 676) # 얘 왜 안끝나?
+    dataset = make_dataset(config.TRAIN_DIR, config.COLUMNS, config.BATCH_SIZE, train = True)  # MapDataset (512, 676) # 얘 왜 안끝나?

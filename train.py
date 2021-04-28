@@ -15,7 +15,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 def train(): # TODO custom loop...
     tabnet_add_dense = models.tabnet_model()
-    train_dataset = dataset.make_dataset(config.TRAIN_DIR, config.COLUMNS, config.BATCH_SIZE, shuffle = True)  # MapDataset (512, 676)
+    train_dataset = dataset.make_dataset(config.TRAIN_DIR, config.COLUMNS, config.BATCH_SIZE, shuffle = True, train = True)  # MapDataset (512, 676)
     tabnet_add_dense.compile(
         loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
         optimizer='adam',

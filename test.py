@@ -4,7 +4,7 @@ import pandas as pd
 import seaborn as sns
 import vaex
 import matplotlib.pyplot as plt
-
+import config
 import models
 import dataset
 import os
@@ -17,6 +17,7 @@ test_data_dir = '/home/ubuntu/data/consulting/data/test_data_consulting.csv'
 
 def test(checkpoint_path, test_data_dir):
     test_data = vaex.open(test_data_dir, convert=True).to_pandas_df()
+
     probs = calculate_probability(test_data, checkpoint_path)
     plot(probs)
     form = summit_form(probs, test_data)
@@ -26,14 +27,13 @@ def calculate_probability(test_data, checkpoint_dir):
     model = models.tabnet_model()
     model.load_weights(checkpoint_path)
 
-    batch_size = 100000
-    dataset_size = test_data.shape[0]
-    n_batchs = test_data.shape[0] // batch_size + 1
+    test_dataset = dataset.make_dataset(config.TRAIN_DIR, config.COLUMNS, config.TEST_BATCH_SIZE, train=False)
     batch_idx = 0
     probs = []
-    for chunk in np.array_split(test_data, n_batchs):
+    for chunk in test_dataset:
         print(f"Process batch: {batch_idx}")
-        print(dataset.preprocess_layer(chunk))
+        embedding = chunk.map(dataset.preprocess_layer)
+        print("뀨")
         probs.append(model.predict(chunk))
         #     print(model.predict(chunk))
         batch_idx += 1
