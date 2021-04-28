@@ -7,18 +7,21 @@ import config
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
-def from_csv_dataset(data_dir, label_name, batch_size, train = True):
+def from_csv_dataset(data_dir, label_name, batch_size, train=True):
     if train:
         dataset = tf.data.experimental.make_csv_dataset(data_dir,
                                                         label_name=label_name,
                                                         na_value='nan',
-                                                        batch_size=batch_size)
+                                                        batch_size=batch_size,
+                                                        num_epochs=1)
         return dataset
     else:
         dataset = tf.data.experimental.make_csv_dataset(data_dir,
                                                         na_value='nan',
-                                                        batch_size=batch_size)
+                                                        batch_size=batch_size,
+                                                        num_epochs=1)  # num_epoch의 의미는?
         return dataset
+
 
 class PackNumericFeatures(object):
     def __init__(self, names):
@@ -69,9 +72,8 @@ class TestPackCategoryFeatures(PackCategoryFeatures):
 
 
 def make_dataset(directory, columns, make_batch_size, shuffle=True, train=True):
-
     if train:
-        dataset = from_csv_dataset(directory, columns["LABEL"], make_batch_size, train = False)
+        dataset = from_csv_dataset(directory, columns["LABEL"], make_batch_size, train=True)
         packed_train_data = dataset.map(
             PackNumericFeatures(columns["NUMERIC_FEATURES"]))
 
@@ -85,7 +87,7 @@ def make_dataset(directory, columns, make_batch_size, shuffle=True, train=True):
             packed_train_data.shuffle(10000, reshuffle_each_iteration=True)
         return packed_train_data
     elif not train:
-        dataset = from_csv_dataset(directory, None, make_batch_size)
+        dataset = from_csv_dataset(directory, None, make_batch_size, train=False)
         packed_test_data = dataset.map(
             TestPackNumericFeatures(columns["NUMERIC_FEATURES"]))
 
@@ -121,4 +123,5 @@ def preprocess_layer(columns):
 
 
 if __name__ == '__main__':
-    dataset = make_dataset(config.TRAIN_DIR, config.COLUMNS, config.BATCH_SIZE, train = True)  # MapDataset (512, 676) # 얘 왜 안끝나?
+    dataset = make_dataset(config.TRAIN_DIR, config.COLUMNS, config.BATCH_SIZE,
+                           train=True)  # MapDataset (512, 676) # 얘 왜 안끝나?
